@@ -47,29 +47,4 @@ class EnviadorDeEmail extends Mailable
         return $this->view('emails.home');
     }
 
-    public function envieEmail()
-    {
-        $titulo = $this->titulo;
-        $conteudo  = $this->conteudo;
-        $nomeComprador = $this->nomeComprador;
-        $emailComprador = $this->emailComprador;
-
-        //$to_name = 'Winição';
-        //$to_email = 'winifidelis@gmail.com';
-        $data = array(
-            'titulo' => $titulo,
-            "email" => $emailComprador,
-            "nome" => $nomeComprador,
-            "conteudo" => $conteudo,
-        );
-
-        Mail::send('emails.templateTeste', $data, function ($message) use ($nomeComprador, $emailComprador) {
-            $message->to($emailComprador, $nomeComprador)
-                ->subject('Chegou email');
-            $message->from($this->emailRemetente, $this->nomeRemetente);
-        });
-
-        $json = 'ok';
-        return response()->json($json);
-    }
 }

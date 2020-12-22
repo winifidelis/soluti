@@ -38,18 +38,26 @@
                                 @foreach($TodosOsArquivos as $arquivo)
                                 <?php
                                 $file = \App\Models\Arquivo::find($arquivo->arquivo->id);
+                                $dono = \App\Models\Userarquivo::where("arquivo_id", "=", $file->id)
+                                    ->where("proprietario", "=", '1')
+                                    ->first();
+                                $dono = \App\Models\User::find($dono->user_id);
+                                $todosPermitidos = \App\Models\Userarquivo::select('users.name')
+                                    ->join('users', 'users.id', '=', 'userarquivos.user_id')
+                                    ->where("arquivo_id", "=", $file->id)
+                                    ->get();
+                                //dd(count($todosPermitidos));
+                                $listaPermitidos = '';
+                                for ($i = 0; $i < count($todosPermitidos); $i++) {
+                                    $listaPermitidos = $listaPermitidos . $todosPermitidos[$i]->name . ',';
+                                }
                                 ?>
                                 <tr class="gradeX">
                                     <td>{{$file->nome}}</td>
                                     <td>
-                                        <a href="{{ route('producoes.edit',$arquivo->id) }}" class="btn btn-success btn-xs">Dar acesso</a>
-                                        <a href="javascript:excluirProducao({{$arquivo->id}},'{{$arquivo->url}}')" class="btn btn-danger btn-xs">Excluir</a>
+                                        <a href="javascript:abrirModal('{{$file->nome}}','{{$dono->name}}','{{$listaPermitidos}}','{{$file->url}}')" class="btn btn-success btn-xs">Ver</a>
                                     </td>
                                 </tr>
-                                <form method="POST" id="excluir{{$arquivo->id}}" name="excluir{{$arquivo->id}}" action="{{ route('producoes.destroy',$arquivo->id) }}">
-                                    <input name="_method" type="hidden" value="DELETE">
-                                    @csrf
-                                </form>
                                 @endforeach
                             </tbody>
                         </table>
@@ -62,145 +70,88 @@
     </div>
 </div>
 
-@endsection
-
-@section('scriptsfinais')
 <script>
-    function excluirProducao(id, nome) {
-        swal({
-                title: "Excluir " + nome,
-                text: "Tem certeza que deseja excluir esta producao?",
-                type: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#27c434",
-                confirmButtonText: "Sim, tchau!",
-                cancelButtonText: "Não, estou arrependido!",
-                closeOnConfirm: false,
-                closeOnCancel: false
-            },
-            function(isConfirm) {
-                if (isConfirm) {
-                    swal("Vamo lá!", "Tchau " + nome, "success");
-                    document.getElementById('excluir' + id).submit();
-                } else {
-                    swal("Cancelado", "Não será excluído :)", "error");
-                }
-            });
+    function abrirModal(nomeArquivo, dono, listaUser, link) {
+        document.getElementById('nomeDoArquivo').innerHTML = nomeArquivo;
+        document.getElementById('responsavelDoArquivo').innerHTML = dono;
+        document.getElementById('usuariosComPermissaoNoarquivo').innerHTML = listaUser;
+        document.getElementById('linkParaDownload').href = "{{asset('uploads/docs/')}}" + "/" + link;
+        $('#modal_pdf').modal('show');
     }
-
-    function enviarProducaoTeste(id, nome) {
-        swal({
-                title: "Enviar TESTE: " + nome,
-                text: "Tem certeza que deseja enviar esta producao de TESTE?",
-                type: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#27c434",
-                confirmButtonText: "Sim, manda brasa!",
-                cancelButtonText: "Não, tenho que arrumar!",
-                closeOnConfirm: false,
-                closeOnCancel: false
-            },
-            function(isConfirm) {
-                if (isConfirm) {
-                    /* ENVIA PRODUÇÃO*/
-                    let data = {
-                        id: id,
-                        _token: '{{csrf_token()}}',
-                    };
-                    $.ajax({
-                        type: 'POST',
-                        url: "{{route('enviarProducaoTeste')}}",
-                        data: data,
-                        dataType: 'json',
-                        success: function(res) {
-                            //alert('Email enviado com sucesso');
-                        },
-                        error: function(err) {
-                            alert('Erro ao enviar email');
-                        }
-                    });
-                    /*FIM ENVIO PRODUÇÃO*/
-                    swal("Vamo lá!", "Os emails já estão sendo enviados!", "success");
-                    //document.getElementById('excluir' + id).submit();
-                } else {
-                    swal("Cancelado", "Não será enviado :)", "error");
-                }
-            });
-    }
-
-    function enviarProducao(id, nome) {
-        swal({
-                title: "Enviar: " + nome,
-                text: "Tem certeza que deseja enviar esta producao para o email de seus contatos?",
-                type: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#27c434",
-                confirmButtonText: "Sim, manda brasa!",
-                cancelButtonText: "Não, tenho que arrumar!",
-                closeOnConfirm: false,
-                closeOnCancel: false
-            },
-            function(isConfirm) {
-                if (isConfirm) {
-                    /* ENVIA PRODUÇÃO*/
-                    let data = {
-                        id: id,
-                        _token: '{{csrf_token()}}',
-                    };
-                    $.ajax({
-                        type: 'POST',
-                        url: "{{route('enviarProducao')}}",
-                        data: data,
-                        dataType: 'json',
-                        success: function(res) {
-                            //alert('Email enviado com sucesso');
-                        },
-                        error: function(err) {
-                            alert('Erro ao enviar email');
-                        }
-                    });
-                    /*FIM ENVIO PRODUÇÃO*/
-                    swal("Vamo lá!", "Os emails já estão sendo enviados!", "success");
-                    //document.getElementById('excluir' + id).submit();
-                } else {
-                    swal("Cancelado", "Não será enviado :)", "error");
-                }
-            });
-    }
-
-    $(document).ready(function() {
-        $('.tabela-arquivos').DataTable({
-            pageLength: 10,
-            responsive: true,
-
-            info: false,
-            paging: true,
-            dom: '<"html5buttons"B>lTfgitp',
-            //dom: '<"toolbar tool2"><"clear-filter">frtip',
-
-            oLanguage: {
-                //"sSearch": "Digite aqui algo para refinar sua busca",
-                "sEmptyTable": "Nenhum registro encontrado",
-                "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registros",
-                "sInfoEmpty": "Mostrando 0 até 0 de 0 registros",
-                "sInfoFiltered": "(Filtrados de _MAX_ registros)",
-                "sInfoPostFix": "",
-                "sInfoThousands": ".",
-                "sLengthMenu": "_MENU_ resultados por página",
-                "sLoadingRecords": "Carregando...",
-                "sProcessing": "Processando...",
-                "sZeroRecords": "Nenhum registro encontrado",
-                "sSearch": "Buscar",
-                "oPaginate": {
-                    "sNext": "Próximo",
-                    "sPrevious": "Anterior",
-                    "sFirst": "Primeiro",
-                    "sLast": "Último"
-                },
-            },
-
-            buttons: [],
-        });
-    });
 </script>
-@endsection
+
+<div class="modal inmodal fade" id="modal_pdf" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                <h4 class="modal-title" id="nomeDoArquivo"></h4>
+            </div>
+            <div class="modal-body">
+                <div class="table-responsive">
+                    <div class="ibox-content">
+                        <div class="row">
+                            <label class="col-sm-2">Responsável:</label>
+                            <div class="col-sm-10">
+                                <p id="responsavelDoArquivo"></p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-2">Usuários com permissão:</label>
+                            <div class="col-sm-10">
+                                <p id="usuariosComPermissaoNoarquivo"></p>
+                            </div>
+                        </div>
+                        <div class="row">
+                            <label class="col-sm-2"></label>
+                            <div class="col-sm-10">
+                                <a href="#" id="linkParaDownload" class="btn btn-success btn-xs">Download</a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @endsection
+
+    @section('scriptsfinais')
+    <script>
+
+        $(document).ready(function() {
+            $('.tabela-arquivos').DataTable({
+                pageLength: 10,
+                responsive: true,
+
+                info: false,
+                paging: true,
+                dom: '<"html5buttons"B>lTfgitp',
+                //dom: '<"toolbar tool2"><"clear-filter">frtip',
+
+                oLanguage: {
+                    //"sSearch": "Digite aqui algo para refinar sua busca",
+                    "sEmptyTable": "Nenhum registro encontrado",
+                    "sInfo": "Mostrando de _START_ até _END_ de _TOTAL_ registros",
+                    "sInfoEmpty": "Mostrando 0 até 0 de 0 registros",
+                    "sInfoFiltered": "(Filtrados de _MAX_ registros)",
+                    "sInfoPostFix": "",
+                    "sInfoThousands": ".",
+                    "sLengthMenu": "_MENU_ resultados por página",
+                    "sLoadingRecords": "Carregando...",
+                    "sProcessing": "Processando...",
+                    "sZeroRecords": "Nenhum registro encontrado",
+                    "sSearch": "Buscar",
+                    "oPaginate": {
+                        "sNext": "Próximo",
+                        "sPrevious": "Anterior",
+                        "sFirst": "Primeiro",
+                        "sLast": "Último"
+                    },
+                },
+
+                buttons: [],
+            });
+        });
+    </script>
+    @endsection

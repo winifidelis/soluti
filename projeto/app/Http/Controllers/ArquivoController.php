@@ -38,6 +38,7 @@ class ArquivoController extends Controller
     public function store(Request $request)
     {
         $informação = '';
+        $data = $request->all();
 
         if ($request->hasfile('arquivos')) {
 
@@ -67,14 +68,25 @@ class ArquivoController extends Controller
                         $userarquivo->proprietario = 1;
                         $userarquivo->save();
 
+                        //Gravando os usuários com permissão ao arquivo
+                        $listaUsers = json_decode($data['lista_usuarios'][0]);
+                        if (is_null($listaUsers))
+                            $listaUsers = [];
+                        for ($i = 0; $i < count($listaUsers); $i++) {
+                            $userarquivo = new Userarquivo();
+                            $userarquivo->user_id = $listaUsers[$i];
+                            $userarquivo->arquivo_id = $arquivo->id;
+                            $userarquivo->proprietario = 0;
+                            $userarquivo->save();
+                        }
                     } else {
                         //dd('DEU RUIM');
                     }
-                }else{
+                } else {
                     $informação = 'Você tentou enviar arquivos diferentes de arquivos PDFs, eles não foram enviados.';
                 }
             }
-            return redirect()->route('home')->with('arquivoEnviados', 'Arquivos cadastrados com sucesso. '.$informação);
+            return redirect()->route('home')->with('arquivoEnviados', 'Arquivos cadastrados com sucesso. ' . $informação);
         } else {
             return redirect()->route('home')->with('arquivoErro', 'Erro ao enviar os arquivos');
         }

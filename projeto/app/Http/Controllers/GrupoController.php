@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Grupo;
 use Illuminate\Http\Request;
 
 class GrupoController extends Controller
@@ -13,7 +14,7 @@ class GrupoController extends Controller
      */
     public function index()
     {
-        //
+        return view('grupos');
     }
 
     /**
@@ -35,6 +36,11 @@ class GrupoController extends Controller
     public function store(Request $request)
     {
         //
+        $data = $request->all();
+        $grupo = new Grupo();
+        $grupo->nome = $data['nome'];
+        $grupo->save();
+        return redirect()->route('grupos.index')->with('grupoCadastrado', 'Grupo cadastrado com sucesso.');
     }
 
     /**

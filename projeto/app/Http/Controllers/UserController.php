@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UserController extends Controller
 {
@@ -13,7 +15,7 @@ class UserController extends Controller
      */
     public function index()
     {
-        //
+        return view('usuarios');
     }
 
     /**
@@ -35,6 +37,19 @@ class UserController extends Controller
     public function store(Request $request)
     {
         //
+        $data = $request->all();
+        $user = User::where("email","=",$data['email'])->get();
+        if(count($user) != 0){
+            return redirect()->route('usuarios.index')->with('emailExiste', 'O email que tentou gravar já existe no banco de dados.');
+        }
+
+        $user = new User();
+        $user->name = $data['name'];
+        $user->email = $data['email'];
+        $user->password = Hash::make($data['password']);
+        $user->save();
+        return redirect()->route('usuarios.index')->with('userCadastrado', 'Usuários cadastrado com sucesso.');
+        
     }
 
     /**

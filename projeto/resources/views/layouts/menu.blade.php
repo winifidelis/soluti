@@ -12,10 +12,10 @@
                 <a href="{{ route('home') }}"><i class="fa fa-dashboard"></i> <span class="nav-label">Dashborard</span></a>
             </li>
             <li>
-                <a href="{{ route('imagens.index') }}"><i class="fa fa-group"></i> <span class="nav-label">Grupos</span></a>
+                <a href="{{ route('grupos.index') }}"><i class="fa fa-group"></i> <span class="nav-label">Grupos</span></a>
             </li>
             <li>
-                <a href="{{ route('producoes.index') }}"><i class="fa fa-user"></i> <span class="nav-label">Usuários</span></a>
+                <a href="{{ route('usuarios.index') }}"><i class="fa fa-user"></i> <span class="nav-label">Usuários</span></a>
             </li>
             <li>
                 <a href="{{ route('enviararquivo') }}"><i class="fa fa-upload"></i> <span class="nav-label">Novo arquivo</span></a>

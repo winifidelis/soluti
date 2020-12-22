@@ -19,3 +19,7 @@ execute o comando abaixo para rodar o projeto
 ```bash
 > php artisan serve
 ```
+
+abra o navegador e acesse o endereço <a href="http://localhost:8000/">http://localhost:8000/</a>
+
+utilize a 'coleção de teste' com pdfs.

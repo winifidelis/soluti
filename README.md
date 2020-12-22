@@ -22,4 +22,14 @@ execute o comando abaixo para rodar o projeto
 
 abra o navegador e acesse o endereço <a href="http://localhost:8000/">http://localhost:8000/</a>
 
+Crie um usuário ou utilize os usuários abaixo
+- email:    user1@gmail.com
+- password: 123456789
+
+- email:    user2@gmail.com
+- password: 123456789
+
+- email:    user3@gmail.com
+- password: 123456789
+
 utilize a 'coleção de teste' com pdfs.

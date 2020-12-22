@@ -2,12 +2,13 @@
 
 namespace App\Models;
 
+use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 
-class User extends Authenticatable
+class User extends Authenticatable implements JWTSubject
 {
     use HasFactory, Notifiable;
 
@@ -32,6 +33,8 @@ class User extends Authenticatable
         'remember_token',
     ];
 
+    //public $timestamps = false;
+
     /**
      * The attributes that should be cast to native types.
      *
@@ -54,5 +57,21 @@ class User extends Authenticatable
     public function userarquivos()
     {
         return $this->hasMany(Userarquivo::class);
+    }
+
+
+
+
+    
+
+    public function getJWTIdentifier()
+    {
+        return $this->getKey();
+    }
+
+    public function getJWTCustomClaims()
+    {
+        //isso aqui é só pra remover um erro
+        return [];
     }
 }
